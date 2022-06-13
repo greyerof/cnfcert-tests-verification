@@ -12,6 +12,7 @@ import (
 	tsparams "github.com/test-network-function/cnfcert-tests-verification/tests/affiliatedcertification/parameters"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalhelper"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalparameters"
+	client "github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	utils "github.com/test-network-function/cnfcert-tests-verification/tests/utils/operator"
 )
 
@@ -104,7 +105,9 @@ func DeleteLabelFromInstalledCSV(prefixCsvName string, namespace string, label m
 
 // GetCsvByPrefix returns csv object based on given prefix.
 func GetCsvByPrefix(prefixCsvName string, namespace string) (*v1alpha1.ClusterServiceVersion, error) {
-	csvs, err := globalhelper.APIClient.ClusterServiceVersions(namespace).List(
+	APIClient := client.Get()
+
+	csvs, err := APIClient.ClusterServiceVersions(namespace).List(
 		context.TODO(), metav1.ListOptions{},
 	)
 	if err != nil {
@@ -148,7 +151,9 @@ func DeployOperatorSubscription(operatorPackage, chanel, namespace, group,
 }
 
 func updateCsv(namespace string, csv *v1alpha1.ClusterServiceVersion) error {
-	_, err := globalhelper.APIClient.ClusterServiceVersions(namespace).Update(
+	APIClient := client.Get()
+
+	_, err := APIClient.ClusterServiceVersions(namespace).Update(
 		context.TODO(), csv, metav1.UpdateOptions{},
 	)
 

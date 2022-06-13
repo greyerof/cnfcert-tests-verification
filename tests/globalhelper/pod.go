@@ -13,6 +13,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/remotecommand"
+
+	client "github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 )
 
 const (
@@ -21,6 +23,8 @@ const (
 
 // ExecCommand runs command in the pod and returns buffer output.
 func ExecCommand(pod corev1.Pod, command []string) (bytes.Buffer, error) {
+	APIClient := client.Get()
+
 	var buf bytes.Buffer
 
 	req := APIClient.CoreV1Interface.RESTClient().
@@ -58,6 +62,7 @@ func ExecCommand(pod corev1.Pod, command []string) (bytes.Buffer, error) {
 
 // GetListOfPodsInNamespace returns list of pods for given namespace.
 func GetListOfPodsInNamespace(namespace string) (*corev1.PodList, error) {
+	APIClient := client.Get()
 	runningPods, err := APIClient.Pods(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
@@ -68,6 +73,7 @@ func GetListOfPodsInNamespace(namespace string) (*corev1.PodList, error) {
 
 // CreateAndWaitUntilPodIsReady create and wait until pod is in a "Running" phase.
 func CreateAndWaitUntilPodIsReady(pod *corev1.Pod, timeout time.Duration) error {
+	APIClient := client.Get()
 	createdPod, err := APIClient.Pods(pod.Namespace).Create(
 		context.Background(),
 		pod,
@@ -93,6 +99,7 @@ func CreateAndWaitUntilPodIsReady(pod *corev1.Pod, timeout time.Duration) error 
 }
 
 func isPodReady(namespace string, podName string) (bool, error) {
+	APIClient := client.Get()
 	podObject, err := APIClient.Pods(namespace).Get(
 		context.Background(),
 		podName,

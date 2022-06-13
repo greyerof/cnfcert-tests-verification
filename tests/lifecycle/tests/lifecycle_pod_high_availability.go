@@ -6,6 +6,7 @@ import (
 
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalhelper"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalparameters"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/deployment"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/execute"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/namespaces"
@@ -16,6 +17,7 @@ import (
 )
 
 var _ = Describe("lifecycle-pod-high-availability", func() {
+	APIClient := client.Get()
 
 	execute.BeforeAll(func() {
 		By("Make masters schedulable")
@@ -28,13 +30,13 @@ var _ = Describe("lifecycle-pod-high-availability", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Clean namespace before each test")
-		err = namespaces.Clean(tsparams.LifecycleNamespace, globalhelper.APIClient)
+		err = namespaces.Clean(tsparams.LifecycleNamespace, APIClient)
 		Expect(err).ToNot(HaveOccurred())
 	})
 
 	// 48492
 	It("One deployment, replicas are more than 1, podAntiAffinity is set", func() {
-		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(globalhelper.APIClient)
+		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(APIClient)
 		Expect(err).ToNot(HaveOccurred())
 
 		if schedulableNodes < 2 {
@@ -47,7 +49,7 @@ var _ = Describe("lifecycle-pod-high-availability", func() {
 
 		deploymenta = deployment.RedefineWithPodAntiAffinity(deploymenta, tsparams.TestDeploymentLabels)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle pod-high-availability test")
@@ -65,7 +67,7 @@ var _ = Describe("lifecycle-pod-high-availability", func() {
 
 	// 48495
 	It("Two deployments, replicas are more than 1, podAntiAffinity is set", func() {
-		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(globalhelper.APIClient)
+		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(APIClient)
 		Expect(err).ToNot(HaveOccurred())
 
 		if schedulableNodes < 4 {
@@ -78,7 +80,7 @@ var _ = Describe("lifecycle-pod-high-availability", func() {
 
 		deploymenta = deployment.RedefineWithPodAntiAffinity(deploymenta, tsparams.TestDeploymentLabels)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Define & create second deployment")
@@ -87,7 +89,7 @@ var _ = Describe("lifecycle-pod-high-availability", func() {
 
 		deploymentb = deployment.RedefineWithPodAntiAffinity(deploymentb, tsparams.TestDeploymentLabels)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle pod-high-availability test")
@@ -105,7 +107,7 @@ var _ = Describe("lifecycle-pod-high-availability", func() {
 
 	// 48499
 	It("One deployment, replicas are more than 1, podAntiAffinity is not set [negative]", func() {
-		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(globalhelper.APIClient)
+		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(APIClient)
 		Expect(err).ToNot(HaveOccurred())
 
 		if schedulableNodes < 2 {
@@ -113,10 +115,10 @@ var _ = Describe("lifecycle-pod-high-availability", func() {
 		}
 
 		By("Define & create deployment")
-		deployment, err := tshelper.DefineDeployment(2, 1, "lifecycleputone")
+		deployment1, err := tshelper.DefineDeployment(2, 1, "lifecycleputone")
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deployment1, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle pod-high-availability test")
@@ -134,7 +136,7 @@ var _ = Describe("lifecycle-pod-high-availability", func() {
 
 	// 48500
 	It("Two deployments, replicas are more than 1, podAntiAffinity is not set [negative]", func() {
-		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(globalhelper.APIClient)
+		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(APIClient)
 		Expect(err).ToNot(HaveOccurred())
 
 		if schedulableNodes < 4 {
@@ -145,14 +147,14 @@ var _ = Describe("lifecycle-pod-high-availability", func() {
 		deploymenta, err := tshelper.DefineDeployment(2, 1, "lifecycleputone")
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Define & create second deployment")
 		deploymentb, err := tshelper.DefineDeployment(2, 1, "lifecycleputtwo")
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle pod-high-availability test")
@@ -170,7 +172,7 @@ var _ = Describe("lifecycle-pod-high-availability", func() {
 
 	// 48869
 	It("One deployment, replicas equal to 1, podAntiAffinity is set [negative]", func() {
-		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(globalhelper.APIClient)
+		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(APIClient)
 		Expect(err).ToNot(HaveOccurred())
 
 		if schedulableNodes == 0 {
@@ -183,7 +185,7 @@ var _ = Describe("lifecycle-pod-high-availability", func() {
 
 		deploymenta = deployment.RedefineWithPodAntiAffinity(deploymenta, tsparams.TestDeploymentLabels)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle pod-high-availability test")

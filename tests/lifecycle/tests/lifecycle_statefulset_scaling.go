@@ -8,6 +8,7 @@ import (
 
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalhelper"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalparameters"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/namespaces"
 
 	tshelper "github.com/test-network-function/cnfcert-tests-verification/tests/lifecycle/helper"
@@ -15,13 +16,14 @@ import (
 )
 
 var _ = Describe("lifecycle-statefulset-scaling", func() {
+	APIClient := client.Get()
 
 	BeforeEach(func() {
 		err := tshelper.WaitUntilClusterIsStable()
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Clean namespace before each test")
-		err = namespaces.Clean(tsparams.LifecycleNamespace, globalhelper.APIClient)
+		err = namespaces.Clean(tsparams.LifecycleNamespace, APIClient)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Enable intrusive tests")

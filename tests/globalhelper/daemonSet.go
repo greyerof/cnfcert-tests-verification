@@ -6,16 +6,18 @@ import (
 	"time"
 
 	"github.com/golang/glog"
+	. "github.com/onsi/gomega"
+	client "github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	v1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	. "github.com/onsi/gomega"
 )
 
 const daemonSetReadyRetryInterval = 5 * time.Second
 
 // CreateAndWaitUntilDaemonSetIsReady creates daemonSet and wait until all  replicas are up and running.
 func CreateAndWaitUntilDaemonSetIsReady(daemonSet *v1.DaemonSet, timeout time.Duration) error {
+	APIClient := client.Get()
+
 	runningDaemonSet, err := APIClient.DaemonSets(daemonSet.Namespace).Create(
 		context.Background(), daemonSet, metav1.CreateOptions{})
 	if err != nil {
@@ -38,6 +40,8 @@ func CreateAndWaitUntilDaemonSetIsReady(daemonSet *v1.DaemonSet, timeout time.Du
 }
 
 func isDaemonSetReady(namespace string, name string) (bool, error) {
+	APIClient := client.Get()
+
 	daemonSet, err := APIClient.DaemonSets(namespace).Get(
 		context.Background(),
 		name,

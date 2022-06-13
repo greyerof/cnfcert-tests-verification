@@ -6,6 +6,8 @@ import (
 
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalhelper"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalparameters"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/deployment"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/namespaces"
 
 	tshelper "github.com/test-network-function/cnfcert-tests-verification/tests/observability/helper"
@@ -17,7 +19,7 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 
 	BeforeEach(func() {
 		By("Clean namespace " + tsparams.TestNamespace + " before each test")
-		err := namespaces.Clean(tsparams.TestNamespace, globalhelper.APIClient)
+		err := namespaces.Clean(tsparams.TestNamespace, client.Get())
 		Expect(err).ToNot(HaveOccurred())
 	})
 
@@ -26,11 +28,11 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 		qeTcFileName := globalhelper.ConvertSpecNameToFileName(CurrentSpecReport().FullText())
 
 		By("Create deployment in the cluster")
-		deployment := tshelper.DefineDeploymentWithStdoutBuffers(
+		deployment1 := tshelper.DefineDeploymentWithStdoutBuffers(
 			tsparams.TestDeploymentBaseName, 1,
 			[]string{tsparams.TwoLogLines})
 
-		err := globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment,
+		err := deployment.CreateAndWaitUntilDeploymentIsReady(deployment1,
 			tsparams.DeploymentDeployTimeoutMins)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -48,11 +50,11 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 		qeTcFileName := globalhelper.ConvertSpecNameToFileName(CurrentSpecReport().FullText())
 
 		By("Create deployment in the cluster")
-		deployment := tshelper.DefineDeploymentWithStdoutBuffers(
+		deployment1 := tshelper.DefineDeploymentWithStdoutBuffers(
 			tsparams.TestDeploymentBaseName, 1,
 			[]string{tsparams.OneLogLine})
 
-		err := globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment,
+		err := deployment.CreateAndWaitUntilDeploymentIsReady(deployment1,
 			tsparams.DeploymentDeployTimeoutMins)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -70,11 +72,11 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 		qeTcFileName := globalhelper.ConvertSpecNameToFileName(CurrentSpecReport().FullText())
 
 		By("Create deployment in the cluster")
-		deployment := tshelper.DefineDeploymentWithStdoutBuffers(
+		deployment1 := tshelper.DefineDeploymentWithStdoutBuffers(
 			tsparams.TestDeploymentBaseName, 1,
 			[]string{tsparams.TwoLogLines, tsparams.TwoLogLines})
 
-		err := globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment,
+		err := deployment.CreateAndWaitUntilDeploymentIsReady(deployment1,
 			tsparams.DeploymentDeployTimeoutMins)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -118,7 +120,7 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 			tsparams.TestDeploymentBaseName+"1", 2,
 			[]string{tsparams.OneLogLine, tsparams.OneLogLine})
 
-		err := globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment1,
+		err := deployment.CreateAndWaitUntilDeploymentIsReady(deployment1,
 			tsparams.DeploymentDeployTimeoutMins)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -127,7 +129,7 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 			tsparams.TestDeploymentBaseName+"2", 2,
 			[]string{tsparams.OneLogLine, tsparams.OneLogLine})
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment2,
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deployment2,
 			tsparams.DeploymentDeployTimeoutMins)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -146,11 +148,11 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 		qeTcFileName := globalhelper.ConvertSpecNameToFileName(CurrentSpecReport().FullText())
 
 		By("Create deployment in the cluster")
-		deployment := tshelper.DefineDeploymentWithStdoutBuffers(
+		deployment1 := tshelper.DefineDeploymentWithStdoutBuffers(
 			tsparams.TestDeploymentBaseName, 1,
 			[]string{tsparams.OneLogLine})
 
-		err := globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment,
+		err := deployment.CreateAndWaitUntilDeploymentIsReady(deployment1,
 			tsparams.DeploymentDeployTimeoutMins)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -217,11 +219,11 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 		qeTcFileName := globalhelper.ConvertSpecNameToFileName(CurrentSpecReport().FullText())
 
 		By("Create deployment in the cluster")
-		deployment := tshelper.DefineDeploymentWithStdoutBuffers(
+		deployment1 := tshelper.DefineDeploymentWithStdoutBuffers(
 			tsparams.TestDeploymentBaseName, 1,
 			[]string{tsparams.NoLogLines})
 
-		err := globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment,
+		err := deployment.CreateAndWaitUntilDeploymentIsReady(deployment1,
 			tsparams.DeploymentDeployTimeoutMins)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -239,11 +241,11 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 		qeTcFileName := globalhelper.ConvertSpecNameToFileName(CurrentSpecReport().FullText())
 
 		By("Create deployment in the cluster")
-		deployment := tshelper.DefineDeploymentWithStdoutBuffers(
+		deployment1 := tshelper.DefineDeploymentWithStdoutBuffers(
 			tsparams.TestDeploymentBaseName, 1,
 			[]string{tsparams.OneLogLine, tsparams.NoLogLines})
 
-		err := globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment,
+		err := deployment.CreateAndWaitUntilDeploymentIsReady(deployment1,
 			tsparams.DeploymentDeployTimeoutMins)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -265,7 +267,7 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 			tsparams.TestDeploymentBaseName+"1", 1,
 			[]string{tsparams.OneLogLine, tsparams.OneLogLine})
 
-		err := globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment1,
+		err := deployment.CreateAndWaitUntilDeploymentIsReady(deployment1,
 			tsparams.DeploymentDeployTimeoutMins)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -274,7 +276,7 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 			tsparams.TestDeploymentBaseName+"2", 1,
 			[]string{tsparams.OneLogLine, tsparams.NoLogLines})
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment2,
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deployment2,
 			tsparams.DeploymentDeployTimeoutMins)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -313,11 +315,11 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 		qeTcFileName := globalhelper.ConvertSpecNameToFileName(CurrentSpecReport().FullText())
 
 		By("Create deployment in the cluster")
-		deployment := tshelper.DefineDeploymentWithStdoutBuffers(
+		deployment1 := tshelper.DefineDeploymentWithStdoutBuffers(
 			tsparams.TestDeploymentBaseName, 1,
 			[]string{tsparams.OneLogLine})
 
-		err := globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment,
+		err := deployment.CreateAndWaitUntilDeploymentIsReady(deployment1,
 			tsparams.DeploymentDeployTimeoutMins)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -344,11 +346,11 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 		qeTcFileName := globalhelper.ConvertSpecNameToFileName(CurrentSpecReport().FullText())
 
 		By("Create deployment in the cluster")
-		deployment := tshelper.DefineDeploymentWithStdoutBuffers(
+		deployment1 := tshelper.DefineDeploymentWithStdoutBuffers(
 			tsparams.TestDeploymentBaseName, 1,
 			[]string{tsparams.OneLogLineWithoutNewLine})
 
-		err := globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment,
+		err := deployment.CreateAndWaitUntilDeploymentIsReady(deployment1,
 			tsparams.DeploymentDeployTimeoutMins)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -367,11 +369,11 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 		qeTcFileName := globalhelper.ConvertSpecNameToFileName(CurrentSpecReport().FullText())
 
 		By("Create deployment in the cluster")
-		deployment := tshelper.DefineDeploymentWithStdoutBuffers(
+		deployment1 := tshelper.DefineDeploymentWithStdoutBuffers(
 			tsparams.TestDeploymentBaseName, 1,
 			[]string{tsparams.OneLogLine, tsparams.OneLogLineWithoutNewLine})
 
-		err := globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment,
+		err := deployment.CreateAndWaitUntilDeploymentIsReady(deployment1,
 			tsparams.DeploymentDeployTimeoutMins)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -389,10 +391,10 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 		qeTcFileName := globalhelper.ConvertSpecNameToFileName(CurrentSpecReport().FullText())
 
 		By("Create deployment without TNF target labels in the cluster")
-		deployment := tshelper.DefineDeploymentWithoutTargetLabels(
+		deployment1 := tshelper.DefineDeploymentWithoutTargetLabels(
 			tsparams.TestDeploymentBaseName)
 
-		err := globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment,
+		err := deployment.CreateAndWaitUntilDeploymentIsReady(deployment1,
 			tsparams.DeploymentDeployTimeoutMins)
 		Expect(err).ToNot(HaveOccurred())
 

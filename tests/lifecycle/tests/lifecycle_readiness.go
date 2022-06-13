@@ -6,6 +6,7 @@ import (
 
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalhelper"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalparameters"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/daemonset"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/deployment"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/namespaces"
@@ -17,13 +18,14 @@ import (
 )
 
 var _ = Describe("lifecycle-readiness", func() {
+	APIClient := client.Get()
 
 	BeforeEach(func() {
 		err := tshelper.WaitUntilClusterIsStable()
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Clean namespace before each test")
-		err = namespaces.Clean(tsparams.LifecycleNamespace, globalhelper.APIClient)
+		err = namespaces.Clean(tsparams.LifecycleNamespace, APIClient)
 		Expect(err).ToNot(HaveOccurred())
 	})
 
@@ -34,7 +36,7 @@ var _ = Describe("lifecycle-readiness", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		deploymenta = deployment.RedefineWithReadinessProbe(deploymenta)
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle-readiness test")
@@ -57,7 +59,7 @@ var _ = Describe("lifecycle-readiness", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		deploymenta = deployment.RedefineWithReadinessProbe(deploymenta)
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Define second deployment with a readiness probe")
@@ -65,7 +67,7 @@ var _ = Describe("lifecycle-readiness", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		deploymentb = deployment.RedefineWithReadinessProbe(deploymentb)
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle-readiness test")
@@ -152,14 +154,14 @@ var _ = Describe("lifecycle-readiness", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		deploymenta = deployment.RedefineWithReadinessProbe(deploymenta)
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Define second deployment without a readiness probe")
 		deploymentb, err := tshelper.DefineDeployment(1, 1, "lifecycledpb")
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle-readiness test")

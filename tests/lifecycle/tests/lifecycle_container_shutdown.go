@@ -6,6 +6,7 @@ import (
 
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalhelper"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalparameters"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/deployment"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/namespaces"
 
@@ -14,13 +15,14 @@ import (
 )
 
 var _ = Describe("lifecycle-container-shutdown", func() {
+	APIClient := client.Get()
 
 	BeforeEach(func() {
 		err := tshelper.WaitUntilClusterIsStable()
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Clean namespace before each test")
-		err = namespaces.Clean(tsparams.LifecycleNamespace, globalhelper.APIClient)
+		err = namespaces.Clean(tsparams.LifecycleNamespace, APIClient)
 		Expect(err).ToNot(HaveOccurred())
 	})
 
@@ -35,7 +37,7 @@ var _ = Describe("lifecycle-container-shutdown", func() {
 		deploymenta = deployment.RedefineAllContainersWithPreStopSpec(
 			deploymenta, tsparams.PreStopCommand)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle-container-shutdown test")
@@ -55,10 +57,10 @@ var _ = Describe("lifecycle-container-shutdown", func() {
 	It("One deployment, one pod without preStop field configured [negative]", func() {
 
 		By("Define deployment without prestop field configured")
-		deployment, err := tshelper.DefineDeployment(1, 1, "lifecycleput")
+		deployment1, err := tshelper.DefineDeployment(1, 1, "lifecycleput")
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deployment1, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle-container-shutdown test")
@@ -84,7 +86,7 @@ var _ = Describe("lifecycle-container-shutdown", func() {
 		deploymenta = deployment.RedefineAllContainersWithPreStopSpec(
 			deploymenta, tsparams.PreStopCommand)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(
 			deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -111,7 +113,7 @@ var _ = Describe("lifecycle-container-shutdown", func() {
 		deploymenta = deployment.RedefineAllContainersWithPreStopSpec(
 			deploymenta, tsparams.PreStopCommand)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(
 			deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -122,7 +124,7 @@ var _ = Describe("lifecycle-container-shutdown", func() {
 		deploymentb = deployment.RedefineAllContainersWithPreStopSpec(
 			deploymentb, tsparams.PreStopCommand)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(
 			deploymentb, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -150,7 +152,7 @@ var _ = Describe("lifecycle-container-shutdown", func() {
 			deploymenta, tsparams.PreStopCommand)
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(
 			deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -174,7 +176,7 @@ var _ = Describe("lifecycle-container-shutdown", func() {
 		deploymenta, err := tshelper.DefineDeployment(3, 2, "lifecycleputa")
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(
 			deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -182,7 +184,7 @@ var _ = Describe("lifecycle-container-shutdown", func() {
 		deploymentb, err := tshelper.DefineDeployment(3, 2, "lifecycleputb")
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(
 			deploymentb, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 

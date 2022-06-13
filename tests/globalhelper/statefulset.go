@@ -7,6 +7,7 @@ import (
 
 	"github.com/golang/glog"
 	. "github.com/onsi/gomega"
+	client "github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	v1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -17,6 +18,8 @@ const (
 
 // CreateAndWaitUntilStatefulSetIsReady creates statefulset and wait until all replicas are ready.
 func CreateAndWaitUntilStatefulSetIsReady(statefulSet *v1.StatefulSet, timeout time.Duration) error {
+	APIClient := client.Get()
+
 	runningReplica, err := APIClient.StatefulSets(statefulSet.Namespace).Create(
 		context.Background(),
 		statefulSet,
@@ -41,6 +44,8 @@ func CreateAndWaitUntilStatefulSetIsReady(statefulSet *v1.StatefulSet, timeout t
 }
 
 func isStatefulSetReady(namespace string, statefulSetName string) (bool, error) {
+	APIClient := client.Get()
+
 	testStatefulSet, err := APIClient.StatefulSets(namespace).Get(
 		context.Background(),
 		statefulSetName,

@@ -9,6 +9,7 @@ import (
 
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalhelper"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalparameters"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/config"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/daemonset"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/deployment"
@@ -19,6 +20,7 @@ import (
 )
 
 var _ = Describe("lifecycle-pod-scheduling", func() {
+	APIClient := client.Get()
 
 	configSuite, err := config.NewConfig()
 	if err != nil {
@@ -30,7 +32,7 @@ var _ = Describe("lifecycle-pod-scheduling", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Clean namespace before each test")
-		err = namespaces.Clean(tsparams.LifecycleNamespace, globalhelper.APIClient)
+		err = namespaces.Clean(tsparams.LifecycleNamespace, APIClient)
 		Expect(err).ToNot(HaveOccurred())
 	})
 
@@ -38,10 +40,10 @@ var _ = Describe("lifecycle-pod-scheduling", func() {
 	It("One deployment, no nodeSelector nor nodeAffinity", func() {
 
 		By("Define Deployment")
-		deployment, err := tshelper.DefineDeployment(1, 1, "lifecycledp")
+		deployment1, err := tshelper.DefineDeployment(1, 1, "lifecycledp")
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deployment1, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle-pod-scheduling test")
@@ -68,7 +70,7 @@ var _ = Describe("lifecycle-pod-scheduling", func() {
 			map[string]string{configSuite.General.CnfNodeLabel: ""})
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle-pod-scheduling test")
@@ -93,7 +95,7 @@ var _ = Describe("lifecycle-pod-scheduling", func() {
 
 		deploymenta = deployment.RedefineWithNodeAffinity(deploymenta, configSuite.General.CnfNodeLabel)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle-pod-scheduling test")
@@ -116,7 +118,7 @@ var _ = Describe("lifecycle-pod-scheduling", func() {
 		deploymenta, err := tshelper.DefineDeployment(1, 1, "lifecycledpa")
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Define Deployment with nodeAffinity")
@@ -126,7 +128,7 @@ var _ = Describe("lifecycle-pod-scheduling", func() {
 		deploymentb = deployment.RedefineWithNodeAffinity(deploymentb,
 			configSuite.General.CnfNodeLabel)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle-pod-scheduling test")
@@ -146,10 +148,10 @@ var _ = Describe("lifecycle-pod-scheduling", func() {
 	It("One deployment, one daemonSet [negative]", func() {
 
 		By("Define Deployment without nodeAffinity/ nodeSelector")
-		deployment, err := tshelper.DefineDeployment(1, 1, "lifecycledp")
+		deployment1, err := tshelper.DefineDeployment(1, 1, "lifecycledp")
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deployment1, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Define daemonSet")

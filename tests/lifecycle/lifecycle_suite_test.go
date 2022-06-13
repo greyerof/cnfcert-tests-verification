@@ -9,6 +9,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	_ "github.com/test-network-function/cnfcert-tests-verification/tests/lifecycle/tests"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/namespaces"
 
 	. "github.com/onsi/gomega"
@@ -34,8 +35,10 @@ var _ = BeforeSuite(func() {
 	err := tshelper.WaitUntilClusterIsStable()
 	Expect(err).ToNot(HaveOccurred())
 
+	APIClient := client.Get()
+
 	By("Create namespace")
-	err = namespaces.Create(tsparams.LifecycleNamespace, globalhelper.APIClient)
+	err = namespaces.Create(tsparams.LifecycleNamespace, APIClient)
 	Expect(err).ToNot(HaveOccurred())
 
 	By("Define TNF config file")
@@ -48,9 +51,11 @@ var _ = BeforeSuite(func() {
 
 var _ = AfterSuite(func() {
 
+	APIClient := client.Get()
+
 	By(fmt.Sprintf("Remove %s namespace", tsparams.LifecycleNamespace))
 	err := namespaces.DeleteAndWait(
-		globalhelper.APIClient,
+		APIClient,
 		tsparams.LifecycleNamespace,
 		tsparams.WaitingTime,
 	)

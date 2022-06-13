@@ -6,6 +6,8 @@ import (
 
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalhelper"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalparameters"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/deployment"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/namespaces"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/pod"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/replicaset"
@@ -15,13 +17,14 @@ import (
 )
 
 var _ = Describe("lifecycle-pod-owner-type", func() {
+	APIClient := client.Get()
 
 	BeforeEach(func() {
 		err := tshelper.WaitUntilClusterIsStable()
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Clean namespace before each test")
-		err = namespaces.Clean(tsparams.LifecycleNamespace, globalhelper.APIClient)
+		err = namespaces.Clean(tsparams.LifecycleNamespace, APIClient)
 		Expect(err).ToNot(HaveOccurred())
 	})
 
@@ -54,13 +57,13 @@ var _ = Describe("lifecycle-pod-owner-type", func() {
 		deploymenta, err := tshelper.DefineDeployment(2, 1, "lifecycleputa")
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		deploymentb, err := tshelper.DefineDeployment(2, 1, "lifecycleputb")
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle-pod-owner-type test")
@@ -126,13 +129,13 @@ var _ = Describe("lifecycle-pod-owner-type", func() {
 		deploymenta, err := tshelper.DefineDeployment(2, 1, "lifecycleputa")
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		deploymentb, err := tshelper.DefineDeployment(2, 1, "lifecycleputb")
 		Expect(err).ToNot(HaveOccurred())
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Define pod")

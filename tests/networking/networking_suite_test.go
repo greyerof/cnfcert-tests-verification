@@ -12,6 +12,7 @@ import (
 
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalhelper"
 	_ "github.com/test-network-function/cnfcert-tests-verification/tests/networking/tests"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/cluster"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/namespaces"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/nodes"
@@ -32,21 +33,22 @@ func TestNetworking(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
+	APIClient := client.Get()
 
 	By("Validate that cluster is Schedulable")
 	Eventually(func() bool {
-		isClusterReady, err := cluster.IsClusterStable(globalhelper.APIClient)
+		isClusterReady, err := cluster.IsClusterStable(APIClient)
 		Expect(err).ToNot(HaveOccurred())
 
 		return isClusterReady
 	}, tsparams.WaitingTime, tsparams.RetryInterval*time.Second).Should(BeTrue())
 
 	By("Validate that all nodes are Ready")
-	err := nodes.WaitForNodesReady(globalhelper.APIClient, tsparams.WaitingTime, tsparams.RetryInterval)
+	err := nodes.WaitForNodesReady(APIClient, tsparams.WaitingTime, tsparams.RetryInterval)
 	Expect(err).ToNot(HaveOccurred())
 
 	By(fmt.Sprintf("Create %s namespace", tsparams.TestNetworkingNameSpace))
-	err = namespaces.Create(tsparams.TestNetworkingNameSpace, globalhelper.APIClient)
+	err = namespaces.Create(tsparams.TestNetworkingNameSpace, APIClient)
 	Expect(err).ToNot(HaveOccurred())
 
 	By("Define TNF config file")
@@ -65,7 +67,7 @@ var _ = BeforeSuite(func() {
 var _ = AfterSuite(func() {
 	By(fmt.Sprintf("Remove %s namespace", tsparams.TestNetworkingNameSpace))
 	err := namespaces.DeleteAndWait(
-		globalhelper.APIClient,
+		client.Get(),
 		tsparams.TestNetworkingNameSpace,
 		tsparams.WaitingTime,
 	)

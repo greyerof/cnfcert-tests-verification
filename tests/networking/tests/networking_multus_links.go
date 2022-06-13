@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalhelper"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalparameters"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/execute"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/namespaces"
 
@@ -19,10 +20,12 @@ var _ = Describe("Networking custom namespace,", func() {
 
 	var multusInterfaces []string
 
+	APIClient := client.Get()
+
 	execute.BeforeAll(func() {
 
 		By("Clean namespace before all tests")
-		err := namespaces.Clean(tsparams.TestNetworkingNameSpace, globalhelper.APIClient)
+		err := namespaces.Clean(tsparams.TestNetworkingNameSpace, APIClient)
 		Expect(err).ToNot(HaveOccurred())
 		err = os.Setenv(globalparameters.PartnerNamespaceEnvVarName, tsparams.TestNetworkingNameSpace)
 		Expect(err).ToNot(HaveOccurred())
@@ -38,7 +41,7 @@ var _ = Describe("Networking custom namespace,", func() {
 	BeforeEach(func() {
 
 		By("Clean namespace before each test")
-		err := namespaces.Clean(tsparams.TestNetworkingNameSpace, globalhelper.APIClient)
+		err := namespaces.Clean(tsparams.TestNetworkingNameSpace, APIClient)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Remove reports from report directory")

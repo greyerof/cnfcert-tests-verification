@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/nad"
 
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/daemonset"
@@ -28,14 +29,14 @@ import (
 func DefineAndCreateDeploymentOnCluster(replicaNumber int32) error {
 	deploymentUnderTest := defineDeploymentBasedOnArgs(tsparams.TestDeploymentAName, replicaNumber, false, nil, nil)
 
-	return globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymentUnderTest, tsparams.WaitingTime)
+	return deployment.CreateAndWaitUntilDeploymentIsReady(deploymentUnderTest, tsparams.WaitingTime)
 }
 
 // DefineAndCreateDeploymentWithMultusOnCluster defines deployment resource and creates it on cluster.
 func DefineAndCreateDeploymentWithMultusOnCluster(name string, nadNames []string, replicaNumber int32) error {
 	deploymentUnderTest := defineDeploymentBasedOnArgs(name, replicaNumber, true, nadNames, nil)
 
-	return globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymentUnderTest, tsparams.WaitingTime)
+	return deployment.CreateAndWaitUntilDeploymentIsReady(deploymentUnderTest, tsparams.WaitingTime)
 }
 
 // DefineAndCreateDeploymentWithMultusAndSkipLabelOnCluster defines deployment resource and creates it on cluster.
@@ -47,7 +48,7 @@ func DefineAndCreateDeploymentWithMultusAndSkipLabelOnCluster(
 		nadNames,
 		tsparams.NetworkingTestMultusSkipLabel)
 
-	return globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymentUnderTest, tsparams.WaitingTime)
+	return deployment.CreateAndWaitUntilDeploymentIsReady(deploymentUnderTest, tsparams.WaitingTime)
 }
 
 // DefineAndCreatePrivilegedDeploymentOnCluster defines deployment resource and creates it on cluster.
@@ -59,7 +60,7 @@ func DefineAndCreatePrivilegedDeploymentOnCluster(replicaNumber int32) error {
 		nil,
 		nil)
 
-	return globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymentUnderTest, tsparams.WaitingTime)
+	return deployment.CreateAndWaitUntilDeploymentIsReady(deploymentUnderTest, tsparams.WaitingTime)
 }
 
 // DefineAndCreateDeploymentWithSkippedLabelOnCluster defines deployment resource and creates it on cluster.
@@ -70,7 +71,7 @@ func DefineAndCreateDeploymentWithSkippedLabelOnCluster(replicaNumber int32) err
 		true,
 		nil,
 		tsparams.NetworkingTestSkipLabel)
-	err := globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymentUnderTest, tsparams.WaitingTime)
+	err := deployment.CreateAndWaitUntilDeploymentIsReady(deploymentUnderTest, tsparams.WaitingTime)
 
 	if err != nil {
 		return err
@@ -89,7 +90,9 @@ func DefineAndCreateDeamonsetWithMultusAndSkipLabelOnCluster(nadName string) err
 
 // AllowAuthenticatedUsersRunPrivilegedContainers adds all authenticated users to privileged group.
 func AllowAuthenticatedUsersRunPrivilegedContainers() error {
-	_, err := globalhelper.APIClient.ClusterRoleBindings().Get(
+	APIClient := client.Get()
+
+	_, err := APIClient.ClusterRoleBindings().Get(
 		context.Background(),
 		"system:openshift:scc:privileged",
 		metav1.GetOptions{},
@@ -101,7 +104,7 @@ func AllowAuthenticatedUsersRunPrivilegedContainers() error {
 			*rbac.DefineRbacAuthorizationClusterRoleRef("system:openshift:scc:privileged"),
 			*rbac.DefineRbacAuthorizationClusterGroupSubjects([]string{"system:authenticated"}),
 		)
-		_, err = globalhelper.APIClient.ClusterRoleBindings().Create(
+		_, err = APIClient.ClusterRoleBindings().Create(
 			context.Background(),
 			roleBind,
 			metav1.CreateOptions{},
@@ -151,7 +154,8 @@ func DefineAndCreateServiceOnCluster(name string, port int32, targetPort int32, 
 		}
 	}
 
-	_, err := globalhelper.APIClient.Services(tsparams.TestNetworkingNameSpace).Create(
+	APIClient := client.Get()
+	_, err := APIClient.Services(tsparams.TestNetworkingNameSpace).Create(
 		context.Background(),
 		testService, metav1.CreateOptions{})
 
@@ -165,7 +169,8 @@ func DefineAndCreateNadOnCluster(name string, intName string, network string) er
 		nadOneInterface = nad.RedefineNadWithWhereaboutsIpam(nadOneInterface, network)
 	}
 
-	return globalhelper.APIClient.Create(context.Background(), nadOneInterface)
+	APIClient := client.Get()
+	return APIClient.Create(context.Background(), nadOneInterface)
 }
 
 func GetClusterMultusInterfaces() ([]string, error) {
@@ -308,7 +313,8 @@ func defineAndCreatePrivilegedDaemonset() error {
 }
 
 func execCmdOnPodsListInNamespace(command []string, execOn string) error {
-	runningTestPods, err := globalhelper.APIClient.Pods(tsparams.TestNetworkingNameSpace).List(
+	APIClient := client.Get()
+	runningTestPods, err := APIClient.Pods(tsparams.TestNetworkingNameSpace).List(
 		context.Background(),
 		metav1.ListOptions{})
 	if err != nil {

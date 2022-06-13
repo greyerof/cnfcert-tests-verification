@@ -8,6 +8,7 @@ import (
 
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalhelper"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalparameters"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/deployment"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/execute"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/namespaces"
@@ -18,6 +19,7 @@ import (
 )
 
 var _ = Describe("lifecycle-pod-recreation", func() {
+	APIClient := client.Get()
 
 	execute.BeforeAll(func() {
 		By("Make masters schedulable")
@@ -34,13 +36,13 @@ var _ = Describe("lifecycle-pod-recreation", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Clean namespace before each test")
-		err = namespaces.Clean(tsparams.LifecycleNamespace, globalhelper.APIClient)
+		err = namespaces.Clean(tsparams.LifecycleNamespace, APIClient)
 		Expect(err).ToNot(HaveOccurred())
 	})
 
 	// 47405
 	It("One deployment with PodAntiAffinity, replicas are less than schedulable nodes", func() {
-		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(globalhelper.APIClient)
+		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(APIClient)
 		Expect(err).ToNot(HaveOccurred())
 
 		if schedulableNodes == 0 {
@@ -54,7 +56,7 @@ var _ = Describe("lifecycle-pod-recreation", func() {
 
 		deploymenta = deployment.RedefineWithPodAntiAffinity(deploymenta, tsparams.TestDeploymentLabels)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle-pod-recreation test")
@@ -72,7 +74,7 @@ var _ = Describe("lifecycle-pod-recreation", func() {
 
 	// 47406
 	It("Two deployments with PodAntiAffinity, replicas are less than schedulable nodes", func() {
-		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(globalhelper.APIClient)
+		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(APIClient)
 		Expect(err).ToNot(HaveOccurred())
 
 		if schedulableNodes < 4 {
@@ -86,7 +88,7 @@ var _ = Describe("lifecycle-pod-recreation", func() {
 
 		deploymenta = deployment.RedefineWithPodAntiAffinity(deploymenta, tsparams.TestDeploymentLabels)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Define & create second deployment")
@@ -95,7 +97,7 @@ var _ = Describe("lifecycle-pod-recreation", func() {
 
 		deploymentb = deployment.RedefineWithPodAntiAffinity(deploymentb, tsparams.TestDeploymentLabels)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle-pod-recreation test")
@@ -113,7 +115,7 @@ var _ = Describe("lifecycle-pod-recreation", func() {
 
 	// 47407
 	It("One deployment with PodAntiAffinity, replicas are equal to schedulable nodes [negative]", func() {
-		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(globalhelper.APIClient)
+		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(APIClient)
 		Expect(err).ToNot(HaveOccurred())
 
 		if schedulableNodes == 0 {
@@ -126,7 +128,7 @@ var _ = Describe("lifecycle-pod-recreation", func() {
 
 		deploymenta = deployment.RedefineWithPodAntiAffinity(deploymenta, tsparams.TestDeploymentLabels)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle-pod-recreation test")
@@ -144,7 +146,7 @@ var _ = Describe("lifecycle-pod-recreation", func() {
 
 	// 47408
 	It("Two deployments with PodAntiAffinity, replicas are equal to schedulable nodes [negative]", func() {
-		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(globalhelper.APIClient)
+		schedulableNodes, err := nodes.GetNumOfReadyNodesInCluster(APIClient)
 		Expect(err).ToNot(HaveOccurred())
 
 		// all nodes will be scheduled with a pod.
@@ -160,7 +162,7 @@ var _ = Describe("lifecycle-pod-recreation", func() {
 
 		deploymenta = deployment.RedefineWithPodAntiAffinity(deploymenta, tsparams.TestDeploymentLabels)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymenta, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Define & create second deployment")
@@ -169,7 +171,7 @@ var _ = Describe("lifecycle-pod-recreation", func() {
 
 		deploymentb = deployment.RedefineWithPodAntiAffinity(deploymentb, tsparams.TestDeploymentLabels)
 
-		err = globalhelper.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
+		err = deployment.CreateAndWaitUntilDeploymentIsReady(deploymentb, tsparams.WaitingTime)
 		Expect(err).ToNot(HaveOccurred())
 
 		By("Start lifecycle-pod-recreation test")

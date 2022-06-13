@@ -10,6 +10,7 @@ import (
 
 	"github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalhelper"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/namespaces"
 
 	tshelper "github.com/test-network-function/cnfcert-tests-verification/tests/affiliatedcertification/helper"
@@ -18,9 +19,11 @@ import (
 )
 
 func preConfigureAffiliatedCertificationEnvironment() {
+	APIClient := client.Get()
+
 	By("Clean test namespace")
 
-	err := namespaces.Clean(tsparams.TestCertificationNameSpace, globalhelper.APIClient)
+	err := namespaces.Clean(tsparams.TestCertificationNameSpace, APIClient)
 	Expect(err).ToNot(HaveOccurred(),
 		"Error cleaning namespace "+tsparams.TestCertificationNameSpace)
 

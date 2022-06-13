@@ -14,7 +14,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/test-network-function/cnfcert-tests-verification/tests/globalhelper"
+	client "github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/namespaces"
 	goclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -22,12 +22,14 @@ import (
 )
 
 func DeployOperatorGroup(namespace string, operatorGroup *olmv1.OperatorGroup) error {
-	err := namespaces.Create(namespace, globalhelper.APIClient)
+	APIClient := client.Get()
+
+	err := namespaces.Create(namespace, APIClient)
 	if err != nil {
 		return err
 	}
 
-	err = globalhelper.APIClient.Create(context.TODO(),
+	err = APIClient.Create(context.TODO(),
 		&olmv1.OperatorGroup{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      operatorGroup.Name,
@@ -45,8 +47,10 @@ func DeployOperatorGroup(namespace string, operatorGroup *olmv1.OperatorGroup) e
 }
 
 func IsOperatorGroupInstalled(operatorGroupName, namespace string) error {
+	APIClient := client.Get()
+
 	var operatorGroup olmv1.OperatorGroup
-	err := globalhelper.APIClient.Get(context.TODO(),
+	err := APIClient.Get(context.TODO(),
 		goclient.ObjectKey{Name: operatorGroupName, Namespace: namespace},
 		&operatorGroup)
 
@@ -58,7 +62,9 @@ func IsOperatorGroupInstalled(operatorGroupName, namespace string) error {
 }
 
 func DeployOperator(subscription *v1alpha1.Subscription) error {
-	err := globalhelper.APIClient.Create(context.TODO(),
+	APIClient := client.Get()
+
+	err := APIClient.Create(context.TODO(),
 		&v1alpha1.Subscription{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      subscription.Name,
@@ -83,7 +89,9 @@ func DeployOperator(subscription *v1alpha1.Subscription) error {
 }
 
 func GetInstallPlanByCSV(namespace string, csvName string) (*v1alpha1.InstallPlan, error) {
-	installPlans, err := globalhelper.APIClient.InstallPlans(namespace).List(context.TODO(), metav1.ListOptions{})
+	APIClient := client.Get()
+
+	installPlans, err := APIClient.InstallPlans(namespace).List(context.TODO(), metav1.ListOptions{})
 
 	if err != nil {
 		return nil, fmt.Errorf("unable to get InstallPlans: %w", err)
@@ -115,7 +123,9 @@ func ApproveInstallPlan(namespace string, plan *v1alpha1.InstallPlan) error {
 }
 
 func DeployRHCertifiedOperatorSource(ocpVersion string) error {
-	err := globalhelper.APIClient.Create(context.TODO(),
+	APIClient := client.Get()
+
+	err := APIClient.Create(context.TODO(),
 		&v1alpha1.CatalogSource{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      tsparams.CertifiedOperatorGroup,
@@ -151,7 +161,9 @@ func EnableCatalogSource(name string) error {
 }
 
 func IsCatalogSourceEnabled(name, namespace, displayName string) (bool, error) {
-	source, err := globalhelper.APIClient.CatalogSources(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+	APIClient := client.Get()
+
+	source, err := APIClient.CatalogSources(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 	if err != nil {
 		return false, nil
 	}
@@ -160,7 +172,9 @@ func IsCatalogSourceEnabled(name, namespace, displayName string) (bool, error) {
 }
 
 func DeleteCatalogSource(name, namespace, displayName string) error {
-	source, err := globalhelper.APIClient.CatalogSources(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+	APIClient := client.Get()
+
+	source, err := APIClient.CatalogSources(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return nil
@@ -170,14 +184,16 @@ func DeleteCatalogSource(name, namespace, displayName string) error {
 	}
 
 	if source.Spec.DisplayName == displayName {
-		return globalhelper.APIClient.Delete(context.TODO(), source)
+		return APIClient.Delete(context.TODO(), source)
 	}
 
 	return nil
 }
 
 func setCatalogSource(disable bool, name string) error {
-	_, err := globalhelper.APIClient.OperatorHubs().Patch(context.TODO(),
+	APIClient := client.Get()
+
+	_, err := APIClient.OperatorHubs().Patch(context.TODO(),
 		"cluster",
 		types.MergePatchType,
 		[]byte("{\"spec\":{\"sources\":[{\"disabled\": "+strconv.FormatBool(disable)+",\"name\": \""+name+"\"}]}}"),
@@ -192,7 +208,9 @@ func setCatalogSource(disable bool, name string) error {
 }
 
 func updateInstallPlan(namespace string, plan *v1alpha1.InstallPlan) error {
-	_, err := globalhelper.APIClient.InstallPlans(namespace).Update(
+	APIClient := client.Get()
+
+	_, err := APIClient.InstallPlans(namespace).Update(
 		context.TODO(), plan, metav1.UpdateOptions{},
 	)
 

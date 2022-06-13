@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/golang/glog"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/cluster"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/daemonset"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/nodes"
@@ -66,7 +67,9 @@ func DefinePod(name string) *corev1.Pod {
 
 // CreateAndWaitUntilReplicaSetIsReady creates replicaSet and wait until all replicas are ready.
 func CreateAndWaitUntilReplicaSetIsReady(replicaSet *v1.ReplicaSet, timeout time.Duration) error {
-	runningReplica, err := globalhelper.APIClient.ReplicaSets(replicaSet.Namespace).Create(
+	APIClient := client.Get()
+
+	runningReplica, err := APIClient.ReplicaSets(replicaSet.Namespace).Create(
 		context.Background(),
 		replicaSet,
 		metav1.CreateOptions{})
@@ -91,14 +94,16 @@ func CreateAndWaitUntilReplicaSetIsReady(replicaSet *v1.ReplicaSet, timeout time
 
 // EnableMasterScheduling enables/disables master nodes scheduling.
 func EnableMasterScheduling(scheduleable bool) error {
-	scheduler, err := globalhelper.APIClient.ConfigV1Interface.Schedulers().Get(
+	APIClient := client.Get()
+
+	scheduler, err := APIClient.ConfigV1Interface.Schedulers().Get(
 		context.TODO(), "cluster", metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
 
 	scheduler.Spec.MastersSchedulable = scheduleable
-	_, err = globalhelper.APIClient.ConfigV1Interface.Schedulers().Update(context.TODO(),
+	_, err = APIClient.ConfigV1Interface.Schedulers().Update(context.TODO(),
 		scheduler, metav1.UpdateOptions{})
 
 	return err
@@ -112,21 +117,25 @@ func DefineDaemonSetWithImagePullPolicy(name string, image string, pullPolicy co
 
 // WaitUntilClusterIsStable validates that all nodes are schedulable, and in ready state.
 func WaitUntilClusterIsStable() error {
+	APIClient := client.Get()
+
 	Eventually(func() bool {
-		isClusterReady, err := cluster.IsClusterStable(globalhelper.APIClient)
+		isClusterReady, err := cluster.IsClusterStable(APIClient)
 		Expect(err).ToNot(HaveOccurred())
 
 		return isClusterReady
 	}, tsparams.WaitingTime, tsparams.RetryInterval*time.Second).Should(BeTrue())
 
-	err := nodes.WaitForNodesReady(globalhelper.APIClient,
+	err := nodes.WaitForNodesReady(APIClient,
 		tsparams.WaitingTime, tsparams.RetryInterval)
 
 	return err
 }
 
 func isReplicaSetReady(namespace string, replicaSetName string) (bool, error) {
-	testReplicaSet, err := globalhelper.APIClient.ReplicaSets(namespace).Get(
+	APIClient := client.Get()
+
+	testReplicaSet, err := APIClient.ReplicaSets(namespace).Get(
 		context.Background(),
 		replicaSetName,
 		metav1.GetOptions{},

@@ -13,6 +13,7 @@ import (
 
 	_ "github.com/test-network-function/cnfcert-tests-verification/tests/affiliatedcertification/tests"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/globalhelper"
+	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/namespaces"
 
 	tsparams "github.com/test-network-function/cnfcert-tests-verification/tests/affiliatedcertification/parameters"
@@ -30,16 +31,19 @@ func TestAffiliatedCertification(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
+	APIClient := client.Get()
+
 	By("Create namespace")
-	err := namespaces.Create(tsparams.TestCertificationNameSpace, globalhelper.APIClient)
+	err := namespaces.Create(tsparams.TestCertificationNameSpace, APIClient)
 	Expect(err).ToNot(HaveOccurred(), "Error creating namespace")
 })
 
 var _ = AfterSuite(func() {
+	APIClient := client.Get()
 
 	By(fmt.Sprintf("Remove %s namespace", tsparams.TestCertificationNameSpace))
 	err := namespaces.DeleteAndWait(
-		globalhelper.APIClient,
+		APIClient,
 		tsparams.TestCertificationNameSpace,
 		tsparams.Timeout,
 	)
