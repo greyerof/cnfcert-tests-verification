@@ -8,8 +8,6 @@ import (
 	"runtime"
 	"strings"
 
-	testclient "github.com/test-network-function/cnfcert-tests-verification/tests/utils/client"
-
 	"github.com/golang/glog"
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v2"
@@ -36,16 +34,6 @@ type Config struct {
 		TnfImage             string `yaml:"tnf_image" envconfig:"TNF_IMAGE"`
 		TnfImageTag          string `yaml:"tnf_image_tag" envconfig:"TNF_IMAGE_TAG"`
 	} `yaml:"general"`
-}
-
-// DefineClients sets client and return it's instance.
-func DefineClients() (*testclient.ClientSet, error) {
-	clients := testclient.New("")
-	if clients == nil {
-		return nil, fmt.Errorf("client is not set please check KUBECONFIG env variable")
-	}
-
-	return clients, nil
 }
 
 // NewConfig returns instance Config type.

@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"os"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -22,6 +23,10 @@ import (
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+var (
+	APIClient *ClientSet
+)
+
 // ClientSet provides the struct to talk with relevant API.
 type ClientSet struct {
 	corev1client.CoreV1Interface
@@ -35,8 +40,23 @@ type ClientSet struct {
 	v1alpha1.OperatorsV1alpha1Interface
 }
 
+func Get() *ClientSet {
+	if APIClient != nil {
+		return APIClient
+	}
+
+	var err error
+
+	APIClient, err = newClientSet("")
+	if err != nil {
+		glog.Fatal(fmt.Errorf("can not load api client. Please check KUBECONFIG env var: %w", err))
+	}
+
+	return APIClient
+}
+
 // New returns a *ClientBuilder with the given kubeconfig.
-func New(kubeconfig string) *ClientSet {
+func newClientSet(kubeconfig string) (*ClientSet, error) {
 	var (
 		config *rest.Config
 		err    error
@@ -55,7 +75,7 @@ func New(kubeconfig string) *ClientSet {
 	}
 
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("unable to load kubeconfig: %w", err)
 	}
 
 	clientSet := &ClientSet{}
@@ -71,24 +91,23 @@ func New(kubeconfig string) *ClientSet {
 	crScheme := runtime.NewScheme()
 
 	if err := clientgoscheme.AddToScheme(crScheme); err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to add CR scheme to clientgoscheme: %w", err)
 	}
 
 	if err := netattdefv1.SchemeBuilder.AddToScheme(crScheme); err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to add CR Sheme to netattdefv1, err: %w", err)
 	}
 
 	if err := olm.AddToScheme(crScheme); err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to add CR Scheme to OLM.")
 	}
 
 	clientSet.Client, err = runtimeclient.New(config, runtimeclient.Options{
 		Scheme: crScheme,
 	})
-
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to get runtime client: %w", err)
 	}
 
-	return clientSet
+	return clientSet, nil
 }
