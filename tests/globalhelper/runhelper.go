@@ -1,6 +1,7 @@
 package globalhelper
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,6 +12,25 @@ import (
 	"github.com/golang/glog"
 	"github.com/test-network-function/cnfcert-tests-verification/tests/utils/container"
 )
+
+func LaunchTnfTestCase(tnfTestCaseName, tnfDebugLogFileName string, expectedTnfResult string) error {
+	err := LaunchTests(tnfTestCaseName, tnfDebugLogFileName)
+
+	if err != nil {
+		if expectedTnfResult == globalparameters.TestCasePassed || expectedTnfResult == globalparameters.TestCaseSkipped {
+			return errors.New("TNF test case " + tnfTestCaseName + " failed but it should have been " + expectedTnfResult)
+		}
+	} else if expectedTnfResult == globalparameters.TestCaseFailed {
+		return errors.New("TNF test case " + tnfTestCaseName + " passed but it should have failed.")
+	}
+
+	err = ValidateIfReportsAreValid(tnfTestCaseName, expectedTnfResult)
+	if err != nil {
+		return errors.New("TNF didn't report the TC as " + expectedTnfResult + ".")
+	}
+
+	return nil
+}
 
 // LaunchTests stats tests based on given parameters.
 func LaunchTests(testCaseName string, tcNameForReport string) error {

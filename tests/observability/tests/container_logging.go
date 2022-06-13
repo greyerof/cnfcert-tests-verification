@@ -22,24 +22,19 @@ var _ = Describe(tsparams.TnfContainerLoggingTcName, func() {
 	})
 
 	// 51747
-	It("One deployment one pod one container that prints two log lines", func() {
+	FIt("One deployment one pod one container that prints two log lines", func() {
 		qeTcFileName := globalhelper.ConvertSpecNameToFileName(CurrentSpecReport().FullText())
+		expectedTnfResult := globalparameters.TestCaseFailed
 
 		By("Create deployment in the cluster")
-		deployment := tshelper.DefineDeploymentWithStdoutBuffers(
-			tsparams.TestDeploymentBaseName, 1,
+		deployment := tshelper.DefineDeploymentWithStdoutBuffers(tsparams.TestDeploymentBaseName, 1,
 			[]string{tsparams.TwoLogLines})
 
-		err := globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment,
-			tsparams.DeploymentDeployTimeoutMins)
+		err := globalhelper.CreateAndWaitUntilDeploymentIsReady(deployment, tsparams.DeploymentDeployTimeoutMins)
 		Expect(err).ToNot(HaveOccurred())
 
-		By("Start TNF " + tnfTestCaseName + " test case")
-		err = globalhelper.LaunchTests(tnfTestCaseName, qeTcFileName)
-		Expect(err).ToNot(HaveOccurred())
-
-		By("Verify test case status in Junit and Claim reports")
-		err = globalhelper.ValidateIfReportsAreValid(tnfTestCaseName, globalparameters.TestCasePassed)
+		By("Launch TNF TC " + tnfTestCaseName + " and validate the result is " + expectedTnfResult)
+		err = globalhelper.LaunchTnfTestCase(tnfTestCaseName, qeTcFileName, expectedTnfResult)
 		Expect(err).ToNot(HaveOccurred())
 	})
 
