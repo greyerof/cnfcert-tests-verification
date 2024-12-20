@@ -22,6 +22,8 @@ func TestAccessControl(t *testing.T) {
 	_, reporterConfig := GinkgoConfiguration()
 	reporterConfig.JUnitReport = globalhelper.GetConfiguration().GetReportPath(currentFile)
 
+	globalhelper.InitK8sLogger()
+
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CNFCert access-control tests", reporterConfig)
 }

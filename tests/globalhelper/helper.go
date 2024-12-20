@@ -11,7 +11,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-logr/logr"
 	"github.com/golang/glog"
+	"go.uber.org/zap/zapcore"
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -20,6 +22,8 @@ import (
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 const (
@@ -28,6 +32,27 @@ const (
 	AppPwd        = "qepwd"
 	PartnerName   = "qeuser"
 )
+
+var logger *logr.Logger
+
+func InitK8sLogger() {
+	if logger == nil {
+		opts := zap.Options{
+			Development: true,
+			Level:       zapcore.DebugLevel,
+		}
+
+		zapLogger := zap.New(zap.UseFlagOptions(&opts))
+		logger = &zapLogger
+
+		ctrl.SetLogger(zapLogger)
+
+		logger.Info("K8s controller-runtime logger initialized")
+	} else {
+		logger.Info("K8s controller-runtime logger already initialized")
+	}
+
+}
 
 // ValidateIfReportsAreValid test if report is valid for given test case.
 func ValidateIfReportsAreValid(tcName string, tcExpectedStatus string, reportDir string) error {
